@@ -1,14 +1,12 @@
 import serial
 import socket
-import logging
 import traceback
 import sys
 
 from ..protocol.message_protocol_rs232 import MessageProtocolRS232
 from ..protocol.message_protocol_tcp import MessageProtocolTCP
-from ..repositories.instruments_repository import InstrumentRepository
-from ..protocol.server_protocol import COMMAND_CREATE_INSTRUMENT, COMMAND_DELETE_INSTRUMENT, COMMAND_GET_INSTRUMENT, COMMAND_GET_INSTRUMENTS, COMMAND_GET_INSTRUMENT_COMMANDS, COMMAND_RESET_DATABASES, \
-    COMMAND_SEND_COMMAND, COMMAND_UPDATE_INSTRUMENT, COMMAND_VALIDATE_COMMAND, COMMAND_DISCONNECT, ServerProtocol
+from ..protocol.server_protocol import *
+
 
 MODE_SERIAL = 'SERIAL'
 MODE_TCP = 'TCP'
@@ -40,8 +38,6 @@ class OpenLISA:
                 logging.error(
                     "OpenLisa started with invalid mode: {}".format(self._mode))
                 exit(1)
-
-            self._list_instruments()
 
             while True:
                 try:
@@ -88,6 +84,18 @@ class OpenLISA:
                             "[OpenLISA][api][start] - sending command to instrument")
                         self._server_protocol.handle_send_command(
                             self._instruments_repository)
+                    elif command == COMMAND_SEND_FILE:
+                        logging.debug(
+                            "[OpenLISA][api][start] - receiving file from client")
+                        self._server_protocol.handle_send_file()
+                    elif command == COMMAND_GET_FILE:
+                        logging.debug(
+                            "[OpenLISA][api][start] - sending file to client")
+                        self._server_protocol.handle_get_file()
+                    elif command == COMMAND_EXECUTE_BASH:
+                        logging.debug(
+                            "[OpenLISA][api][start] - executing bash command sending by client")
+                        self._server_protocol.handle_execute_bash_command()
                     elif command == COMMAND_DISCONNECT:
                         logging.info(
                             "[OpenLISA][api][start] - client order disconnect")
